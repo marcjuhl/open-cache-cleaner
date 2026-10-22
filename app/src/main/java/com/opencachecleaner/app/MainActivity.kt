@@ -2,6 +2,7 @@ package com.opencachecleaner.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,11 @@ class MainActivity : ComponentActivity() {
 
                     val shouldShowOnboarding = forceShowSettings || !uiState.areCorePermissionsGranted
 
+                    // Enable device system back gesture/button to exit settings when opened from app list
+                    BackHandler(enabled = forceShowSettings && uiState.areCorePermissionsGranted) {
+                        forceShowSettings = false
+                    }
+
                     when {
                         // Priority 1: Active Cleaning Overlay/Screen
                         uiState.cleaningState !is CleaningState.Idle -> {
@@ -56,6 +62,8 @@ class MainActivity : ComponentActivity() {
                                 isRootAvailable = uiState.isRootAvailable,
                                 isShizukuAvailable = uiState.isShizukuAvailable,
                                 selectedMode = uiState.selectedMode,
+                                canNavigateBack = forceShowSettings || uiState.areCorePermissionsGranted,
+                                onNavigateBack = { forceShowSettings = false },
                                 onGrantAccessibility = {
                                     PermissionHelper.openAccessibilitySettings(this@MainActivity)
                                 },

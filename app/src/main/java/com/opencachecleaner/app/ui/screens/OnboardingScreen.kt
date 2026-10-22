@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessibilityNew
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DataUsage
@@ -32,6 +33,8 @@ fun OnboardingScreen(
     isRootAvailable: Boolean,
     isShizukuAvailable: Boolean,
     selectedMode: CleaningMode,
+    canNavigateBack: Boolean = false,
+    onNavigateBack: () -> Unit = {},
     onGrantAccessibility: () -> Unit,
     onGrantUsageAccess: () -> Unit,
     onSelectMode: (CleaningMode) -> Unit,
@@ -40,7 +43,17 @@ fun OnboardingScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Permission Setup") }
+                title = { Text(if (canNavigateBack) "Settings & Permissions" else "Permission Setup") },
+                navigationIcon = {
+                    if (canNavigateBack) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back to apps"
+                            )
+                        }
+                    }
+                }
             )
         }
     ) { paddingValues ->
