@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Open Cache Cleaner</string>
+    <string name="accessibility_service_label">Cache Cleaner Automation</string>
+    <string name="accessibility_service_description">Automates navigating to App Info settings and pressing \'Clear Cache\' for selected applications safely without clearing user data.</string>
+</resources>
