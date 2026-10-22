@@ -1,0 +1,57 @@
+name: Build & Publish Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "gradle"
+
+      - name: Grant Execute Permission to Gradlew
+        run: chmod +x gradlew
+
+      - name: Assemble Release APK
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-cache-cleaner-apk
+          path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: app/build/outputs/apk/release/app-release.apk
+          name: Open Cache Cleaner ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body: |
+            # Open Cache Cleaner ${{ github.ref_name }} 🧹
+
+            Initial release of Open Cache Cleaner for Android.
+
+            ### Features:
+            - **Non-Root Accessibility Automation**: Automatically opens App Info settings and clicks "Clear Cache" without data wipe risks.
+            - **SuperUser Root & Shizuku Shell**: Blazing fast zero-UI background cache clearing.
+            - **Material 3 UI**: Dynamic theming, search filtering, animated progress ring, and multi-select queue management.
+            - **StorageStatsManager**: Exact cache size measurement across all installed applications.
