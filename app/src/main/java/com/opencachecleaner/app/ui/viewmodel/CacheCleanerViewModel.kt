@@ -20,6 +20,7 @@ data class CleanerUiState(
     val apps: List<AppCacheInfo> = emptyList(),
     val searchQuery: String = "",
     val includeSystemApps: Boolean = false,
+    val isTurboMode: Boolean = false,
     val selectedMode: CleaningMode = CleaningMode.ACCESSIBILITY,
     val isAccessibilityGranted: Boolean = false,
     val isUsageAccessGranted: Boolean = false,
@@ -132,6 +133,11 @@ class CacheCleanerViewModel(application: Application) : AndroidViewModel(applica
     fun setIncludeSystemApps(include: Boolean) {
         _uiState.update { it.copy(includeSystemApps = include) }
         loadInstalledApps()
+    }
+
+    fun setTurboMode(enabled: Boolean) {
+        _uiState.update { it.copy(isTurboMode = enabled) }
+        accessibilityEngine.isTurboMode = enabled
     }
 
     fun setCleaningMode(mode: CleaningMode) {

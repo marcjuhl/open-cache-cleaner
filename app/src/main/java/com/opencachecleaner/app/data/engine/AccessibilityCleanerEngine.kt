@@ -17,6 +17,8 @@ class AccessibilityCleanerEngine(
     private val context: Context
 ) : CleanerEngine {
 
+    var isTurboMode: Boolean = false
+
     private val engineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var job: Job? = null
 
@@ -59,6 +61,7 @@ class AccessibilityCleanerEngine(
     }
 
     private suspend fun runCleaningLoop() {
+        CacheCleanerAccessibilityService.isTurboMode = isTurboMode
         CacheCleanerAccessibilityService.isRunning = true
 
         while (currentIndex < targetList.size && !isCancelled) {
@@ -75,7 +78,7 @@ class AccessibilityCleanerEngine(
                 currentIndex = currentIndex + 1,
                 totalApps = targetList.size,
                 freedBytes = accumulatedFreedBytes,
-                statusMessage = "Opening ${currentApp.appName} settings..."
+                statusMessage = if (isTurboMode) "⚡ [Turbo] Opening ${currentApp.appName}..." else "Opening ${currentApp.appName} settings..."
             )
 
             // Reset service step
@@ -84,8 +87,9 @@ class AccessibilityCleanerEngine(
             // Open app settings page
             openAppDetails(currentApp.packageName)
 
-            // Wait for completion callback or timeout watchdog (3.5 seconds)
-            val success = withTimeoutOrNull(3500L) {
+            // Watchdog timeout: In Turbo mode, reduced from 3500ms to 1200ms to rapidly skip unresponsive screens
+            val timeoutDuration = if (isTurboMode) 1200L else 3500L
+            val success = withTimeoutOrNull(timeoutDuration) {
                 suspendCancellableCoroutine { continuation ->
                     CacheCleanerAccessibilityService.onAppFinishedCallback = { cleared ->
                         if (continuation.isActive) {
@@ -100,7 +104,8 @@ class AccessibilityCleanerEngine(
             }
 
             currentIndex++
-            delay(150) // Small breather between apps
+            // In Turbo mode, minimal 40ms transition delay vs 150ms
+            delay(if (isTurboMode) 40L else 150L)
         }
 
         CacheCleanerAccessibilityService.stopAutomation()

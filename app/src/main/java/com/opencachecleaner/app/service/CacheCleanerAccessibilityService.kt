@@ -100,9 +100,10 @@ class CacheCleanerAccessibilityService : AccessibilityService() {
         clickNode(clearCacheNode)
         currentStep = Step.WAIT_CLEARED
 
-        // Allow UI brief debounce to complete cache zeroing before moving to next app
+        // Debounce delay: Turbo Mode uses 80ms for ultra-fast skipping, standard uses 350ms to allow UI updates
+        val debounceDelay = if (isTurboMode) 80L else 350L
         serviceScope.launch {
-            delay(350)
+            delay(debounceDelay)
             onAppCleanedSuccess()
         }
     }
@@ -243,6 +244,7 @@ class CacheCleanerAccessibilityService : AccessibilityService() {
         private val _isServiceBound = MutableStateFlow(false)
         val isServiceBound: StateFlow<Boolean> = _isServiceBound.asStateFlow()
 
+        var isTurboMode: Boolean = false
         var isRunning: Boolean = false
         var currentStep: Step = Step.WAIT_APP_INFO
         var onAppFinishedCallback: ((success: Boolean) -> Unit)? = null

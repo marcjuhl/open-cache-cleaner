@@ -81,10 +81,12 @@ class MainActivity : ComponentActivity() {
                                 selectedMode = uiState.selectedMode,
                                 isLoading = uiState.isLoading,
                                 includeSystemApps = uiState.includeSystemApps,
+                                isTurboMode = uiState.isTurboMode,
                                 onSearchQueryChange = { viewModel.setSearchQuery(it) },
                                 onToggleAppSelection = { viewModel.toggleAppSelection(it) },
                                 onSelectAll = { viewModel.selectAll(it) },
                                 onToggleSystemApps = { viewModel.setIncludeSystemApps(it) },
+                                onToggleTurboMode = { viewModel.setTurboMode(it) },
                                 onRefresh = { viewModel.loadInstalledApps() },
                                 onOpenSettings = { forceShowSettings = true },
                                 onStartCleaning = { viewModel.startCleaning() }

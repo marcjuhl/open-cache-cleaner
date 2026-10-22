@@ -35,15 +35,56 @@ fun AppListScreen(
     selectedMode: CleaningMode,
     isLoading: Boolean,
     includeSystemApps: Boolean,
+    isTurboMode: Boolean,
     onSearchQueryChange: (String) -> Unit,
     onToggleAppSelection: (String) -> Unit,
     onSelectAll: (Boolean) -> Unit,
     onToggleSystemApps: (Boolean) -> Unit,
+    onToggleTurboMode: (Boolean) -> Unit,
     onRefresh: () -> Unit,
     onOpenSettings: () -> Unit,
     onStartCleaning: () -> Unit
 ) {
     var isSearchVisible by remember { mutableStateOf(false) }
+    var showTurboWarningDialog by remember { mutableStateOf(false) }
+
+    if (showTurboWarningDialog) {
+        AlertDialog(
+            onDismissRequest = { showTurboWarningDialog = false },
+            icon = {
+                Icon(
+                    Icons.Default.Bolt,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
+            title = {
+                Text("Enable Turbo Mode?")
+            },
+            text = {
+                Text(
+                    "Turbo Mode drastically reduces animation breathers and watchdog timeouts (1.2s vs 3.5s) to clean apps up to 3x faster.\n\n" +
+                    "⚠️ Accuracy Warning: On slower devices or heavy OEM skins (MIUI/One UI), some settings screens may not finish loading before automation moves on, potentially skipping some app caches."
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onToggleTurboMode(true)
+                        showTurboWarningDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Enable Turbo")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTurboWarningDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -148,11 +189,32 @@ fun AppListScreen(
                     )
                 }
 
-                FilterChip(
-                    selected = includeSystemApps,
-                    onClick = { onToggleSystemApps(!includeSystemApps) },
-                    label = { Text("Include System") }
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = isTurboMode,
+                        onClick = {
+                            if (!isTurboMode) {
+                                showTurboWarningDialog = true
+                            } else {
+                                onToggleTurboMode(false)
+                            }
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Bolt,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        label = { Text("Turbo") }
+                    )
+
+                    FilterChip(
+                        selected = includeSystemApps,
+                        onClick = { onToggleSystemApps(!includeSystemApps) },
+                        label = { Text("Include System") }
+                    )
+                }
             }
 
             if (isLoading) {
