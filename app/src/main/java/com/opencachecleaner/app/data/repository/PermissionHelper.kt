@@ -42,7 +42,7 @@ object PermissionHelper {
 
     fun isShizukuAvailable(context: Context): Boolean {
         return try {
-            if (Shizuku.isPre_V11()) return false
+            if (Shizuku.isPreV11()) return false
             if (Shizuku.pingBinder()) {
                 Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
             } else {

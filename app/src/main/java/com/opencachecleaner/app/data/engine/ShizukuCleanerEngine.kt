@@ -90,7 +90,13 @@ class ShizukuCleanerEngine : CleanerEngine {
 
     private fun executeShizukuCommand(command: Array<String>): Boolean {
         return try {
-            val process = Shizuku.newProcess(command, null, null)
+            val method = Shizuku::class.java.getDeclaredMethod(
+                "newProcess",
+                Array<String>::class.java,
+                Array<String>::class.java,
+                String::class.java
+            ).apply { isAccessible = true }
+            val process = method.invoke(null, command, null, null) as java.lang.Process
             val reader = BufferedReader(InputStreamReader(process.inputStream))
             reader.readLines()
             process.waitFor() == 0
